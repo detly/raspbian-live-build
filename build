@@ -11,4 +11,4 @@ lb config \
     --firmware-binary false \
     --firmware-chroot false
 
-sudo lb build
+sudo lb build 2>&1 | tee build_log
