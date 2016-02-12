@@ -2,7 +2,7 @@
 lb config \
     --apt-indices none \
     --apt-source-archives false \
-    --distribution wheezy \
+    --distribution jessie \
     --binary-images hdd \
     --hdd-size 512 \
     --architectures armhf \
