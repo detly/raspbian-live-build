@@ -15,7 +15,6 @@ GENERAL_BUILD_OPTIONS = \
 	--apt-source-archives false \
 	--archive-areas 'main firmware non-free' \
 	--bootappend-live "boot=live config hostname=pi username=pi" \
-	--bootstrap-flavour minimal \
 	--cache-stages false \
 	--compression gzip \
 	--distribution wheezy \
