@@ -76,9 +76,11 @@ config:
 build/binary.img:
 	( cd build && sudo lb build ) 2>&1 | tee $(BUILD_LOG)
 
+# Add /sbin to the path for parted, because this is where it resides on some
+# systems.
 pi-minimal.img: build/binary.img
 	cp build/binary.img ./pi-minimal-wip.img
-	parted -s pi-minimal-wip.img set 1 lba on
+	export PATH=/sbin:$$PATH; parted -s pi-minimal-wip.img set 1 lba on
 	mv pi-minimal-wip.img pi-minimal.img
 	rm -f pi-minimal-initrd.img-*
 	rm -f pi-minimal-vmlinuz-*
