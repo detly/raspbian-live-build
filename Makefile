@@ -15,7 +15,6 @@ GENERAL_BUILD_OPTIONS = \
 	--apt-source-archives false \
 	--archive-areas 'main firmware non-free' \
 	--bootappend-live "boot=live config hostname=pi username=pi" \
-	--bootstrap-flavour minimal \
 	--cache-stages false \
 	--compression gzip \
 	--distribution jessie \
@@ -54,7 +53,8 @@ PI_BUILD_OPTIONS = \
 	--mirror-bootstrap "http://archive.raspbian.org/raspbian" \
 	--mirror-binary "http://archive.raspbian.org/raspbian" \
 	--parent-mirror-bootstrap "http://archive.raspbian.org/raspbian" \
-	--parent-mirror-binary "http://archive.raspbian.org/raspbian"
+	--parent-mirror-binary "http://archive.raspbian.org/raspbian" \
+	--updates false
 
 .PHONY: clean dist-clean config
 
@@ -74,12 +74,14 @@ config:
 			$(PI_BUILD_OPTIONS)
 	cp -rf config build/
 
-build/binary.img:
+build/live-image-armhf.img:
 	( cd build && sudo lb build ) 2>&1 | tee $(BUILD_LOG)
 
-pi-minimal.img: build/binary.img
-	cp build/binary.img ./pi-minimal-wip.img
-	parted -s pi-minimal-wip.img set 1 lba on
+# Add /sbin to the path for parted, because this is where it resides on some
+# systems.
+pi-minimal.img: build/live-image-armhf.img
+	cp build/live-image-armhf.img ./pi-minimal-wip.img
+	export PATH=/sbin:$$PATH; parted -s pi-minimal-wip.img set 1 lba on
 	mv pi-minimal-wip.img pi-minimal.img
 	rm -f pi-minimal-initrd.img-*
 	rm -f pi-minimal-vmlinuz-*
@@ -87,7 +89,9 @@ pi-minimal.img: build/binary.img
 		destfile="pi-minimal-$$(basename "$$file")" ; \
 		cp "$$file" "$$destfile" ; \
 	done
-	[ -f /.dockerinit ] && [ -f pi-minimal.img ] && mv pi-minimal.img /raspbian-live-build/
+	if [ -f /.dockerinit -a -f pi-minimal.img ]; then \
+		mv pi-minimal.img /raspbian-live-build/; \
+	fi
 
 dist-clean:
 	-sudo rm -rf build
