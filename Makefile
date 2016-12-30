@@ -14,11 +14,10 @@ GENERAL_BUILD_OPTIONS = \
 	--apt-secure false \
 	--apt-source-archives false \
 	--archive-areas 'main firmware non-free' \
-	--bootappend-live "boot=live config hostname=pi username=pi" \
+	--bootappend-live "rw earlyprintk loglevel=8 console=ttyAMA0,115200 console=tty1 dwc_otg.lpm_enable=0 root=/dev/mmcblk0p1 elevator=deadline fsck.repair=yes rootwait boot=live components" \
 	--cache-stages false \
-	--compression gzip \
+	--compression none \
 	--distribution jessie \
-	--gzip-options '-9 --rsyncable' \
 	--mode debian \
 	--security false
 
@@ -49,11 +48,15 @@ PI_BUILD_OPTIONS = \
 	--bootstrap-qemu-static /usr/bin/qemu-arm-static \
 	--firmware-binary false \
 	--firmware-chroot false \
-	--linux-flavours "rpi rpi-rpfv rpi2-rpfv" \
-	--mirror-bootstrap "http://archive.raspbian.org/raspbian" \
-	--mirror-binary "http://archive.raspbian.org/raspbian" \
-	--parent-mirror-bootstrap "http://archive.raspbian.org/raspbian" \
-	--parent-mirror-binary "http://archive.raspbian.org/raspbian" \
+	--linux-flavours "rpi2-rpfv" \
+	--parent-mirror-bootstrap http://archive.raspbian.org/raspbian \
+	--parent-mirror-chroot-security http://archive.raspbian.org/raspbian \
+	--parent-mirror-binary http://archive.raspbian.org/raspbian \
+	--parent-mirror-binary-security http://archive.raspbian.org/raspbian \
+	--mirror-bootstrap http://archive.raspbian.org/raspbian \
+	--mirror-chroot-security http://archive.raspbian.org/raspbian \
+	--mirror-binary http://archive.raspbian.org/raspbian \
+	--mirror-binary-security http://archive.raspbian.org/raspbian \
 	--updates false
 
 .PHONY: clean dist-clean config
@@ -89,6 +92,9 @@ pi-minimal.img: build/live-image-armhf.img
 		destfile="pi-minimal-$$(basename "$$file")" ; \
 		cp "$$file" "$$destfile" ; \
 	done
+	
+	cp ./build/chroot/usr/lib/linux-image-4.4.0-1-rpi2/bcm2709-rpi-2-b.dtb pi-minimal-bcm2709-rpi-2-b.dtb
+
 	if [ -f /.dockerinit -a -f pi-minimal.img ]; then \
 		mv pi-minimal.img /raspbian-live-build/; \
 	fi
